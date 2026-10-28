@@ -39,8 +39,6 @@ model User {
 
   sessions Session[]
 
-  orders Order[]
-
   addresses Address[]
 }
 model Session {
@@ -128,6 +126,8 @@ model Product {
   images ProductImage[]
 
   orderItems OrderItem[]
+
+  reviews Review[]
 
   cartItems CartItem[]
 
