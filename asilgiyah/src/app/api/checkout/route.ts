@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { randomUUID } from "node:crypto";
 import { checkoutSchema } from "@/lib/checkout-validation";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const currentUser = await getCurrentUser();
     const order = await prisma.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
         where: { sessionKey: cartKey },
@@ -79,6 +81,7 @@ export async function POST(request: NextRequest) {
       const created = await tx.order.create({
         data: {
           orderNumber,
+          userId: currentUser?.id ?? null,
           customerName: parsed.data.name,
           email: parsed.data.email,
           phone: parsed.data.phone,
