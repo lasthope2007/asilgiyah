@@ -83,7 +83,9 @@ model Product {
   cartItems CartItem[]
   inventory InventoryTransaction[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @@index([categoryId,isActive]) @@index([isDemo,createdAt])
+  updatedAt DateTime @updatedAt
+  @@index([categoryId,isActive])
+  @@index([isDemo,createdAt])
 }
 model ProductVariant {
   id String @id @default(cuid())
@@ -118,7 +120,8 @@ model CartItem {
   variantId String?
   quantity Int
   cart Cart @relation(fields:[cartId],references:[id],onDelete:Cascade)
-  product Product @relation(fields:[productId],references:[id]) variant ProductVariant? @relation(fields:[variantId],references:[id]) @@unique([cartId,productId,variantId])
+  product Product @relation(fields:[productId],references:[id]) variant ProductVariant? @relation(fields:[variantId],references:[id])
+  @@unique([cartId,productId,variantId])
 }
 model Order {
   id String @id @default(cuid())
@@ -139,7 +142,8 @@ model Order {
   isDemo Boolean @default(true)
   createdAt DateTime @default(now())
   items OrderItem[]
-  payments Payment[] @@index([isDemo,createdAt])
+  payments Payment[]
+  @@index([isDemo,createdAt])
 }
 model OrderItem {
   id String @id @default(cuid())
@@ -204,7 +208,8 @@ model WishlistItem {
   id String @id @default(cuid())
   wishlistId String
   productId String
-  wishlist Wishlist @relation(fields:[wishlistId],references:[id],onDelete:Cascade) @@unique([wishlistId,productId])
+  wishlist Wishlist @relation(fields:[wishlistId],references:[id],onDelete:Cascade)
+  @@unique([wishlistId,productId])
 }
 model InventoryTransaction {
   id String @id @default(cuid())
