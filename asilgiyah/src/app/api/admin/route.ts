@@ -5,6 +5,56 @@ import { getCurrentUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "برای ادامه وارد حساب شوید." }, { status: 401 });
+  if (user.role !== "ADMIN") return NextResponse.json({ error: "این حساب دسترسی مدیر ندارد." }, { status: 403 });
+
+  try {
+    const [productsCount, ordersCount, customersCount, revenue, pending, lowStock, products, orders, categories, users] = await Promise.all([
+      prisma.product.count(),
+      prisma.order.count(),
+      prisma.user.count({ where: { role: "CUSTOMER" } }),
+      prisma.order.aggregate({ where: { status: { not: "CANCELLED" } }, _sum: { totalToman: true } }),
+      prisma.order.count({ where: { status: "PENDING" } }),
+      prisma.product.count({ where: { isActive: true, stock: { lt: 5 } } }),
+      prisma.product.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        include: { category: { select: { name: true } }, images: { orderBy: { sortOrder: "asc" }, take: 1 } },
+      }),
+      prisma.order.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        include: { items: { select: { id: true, productNameSnapshot: true, quantity: true } } },
+      }),
+      prisma.category.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true, slug: true } }),
+      prisma.user.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: { id: true, name: true, email: true, role: true, createdAt: true },
+      }),
+    ]);
+    return NextResponse.json({
+      stats: {
+        products: productsCount,
+        orders: ordersCount,
+        customers: customersCount,
+        revenue: revenue._sum.totalToman ?? 0,
+        pending,
+        lowStock,
+      },
+      products,
+      orders,
+      categories,
+      users,
+    });
+  } catch (error) {
+    console.error("Admin dashboard load failed", error);
+    return NextResponse.json({ error: "خواندن اطلاعات پنل ناموفق بود. اتصال پایگاه داده را بررسی کنید." }, { status: 500 });
+  }
+}
+
 async function requireAdmin() {
   const user = await getCurrentUser();
   return user?.role === "ADMIN" ? user : null;
