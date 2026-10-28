@@ -1,24 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { randomUUID } from "node:crypto";
-import { z } from "zod";
+import { checkoutSchema } from "@/lib/checkout-validation";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
-
-const latinDigits = (value: string) =>
-  value.replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
-    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
-
-const schema = z.object({
-  name: z.string().trim().min(2).max(100),
-  phone: z.string().trim().transform(latinDigits).transform((v) => v.replace(/[\s-]/g, "").replace(/^(?:\+98|0098)/, "0")).pipe(z.string().regex(/^09\d{9}$/)),
-  email: z.string().trim().email().max(254),
-  province: z.string().trim().min(2).max(80),
-  city: z.string().trim().min(2).max(80),
-  postalCode: z.string().trim().transform(latinDigits).transform((v) => v.replace(/[\s-]/g, "")).pipe(z.string().regex(/^\d{10}$/)),
-  address: z.string().trim().min(10).max(500),
-});
 
 function checkoutError(request: NextRequest, code: string) {
   return NextResponse.redirect(new URL(`/checkout?error=${encodeURIComponent(code)}`, request.url), 303);
@@ -26,7 +12,7 @@ function checkoutError(request: NextRequest, code: string) {
 
 export async function POST(request: NextRequest) {
   const form = await request.formData();
-  const parsed = schema.safeParse({
+  const parsed = checkoutSchema.safeParse({
     name: form.get("name"),
     phone: form.get("phone"),
     email: form.get("email"),
