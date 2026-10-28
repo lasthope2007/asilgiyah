@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { compare } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createUserSession } from "@/lib/session";
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "ایمیل و رمز عبور را درست وارد کنید." }, { status: 400 });
   try {
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
-    const valid = user ? await compare(parsed.data.password, user.passwordHash) : false;
+    const valid = user ? await bcrypt.compare(parsed.data.password, user.passwordHash) : false;
     if (!user || !valid) return NextResponse.json({ error: "ایمیل یا رمز عبور اشتباه است." }, { status: 401 });
     await createUserSession(user.id);
     return NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
