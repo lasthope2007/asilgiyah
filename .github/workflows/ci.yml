@@ -18,6 +18,9 @@ jobs:
   build:
     name: Install dependencies, test, and build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: asilgiyah
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/asilgiyah?schema=public
     steps:
@@ -37,11 +40,11 @@ jobs:
       - name: Check project files
         run: |
           if [ ! -f package.json ]; then
-            echo "::error::package.json was not found in the repository root."
+            echo "::error::asilgiyah/package.json was not found."
             exit 1
           fi
-          if [ ! -d src ]; then
-            echo "::error::The src directory was not found. Upload all ASILGIYAH project files to the repository root."
+          if [ ! -d src ] || [ ! -d prisma ]; then
+            echo "::error::The src or prisma directory is missing from asilgiyah/."
             exit 1
           fi
 
