@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createUserSession } from "@/lib/session";
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) return NextResponse.json({ error: "با این ایمیل قبلاً حساب ساخته شده است." }, { status: 409 });
-    const user = await prisma.user.create({ data: { name: parsed.data.name, email, passwordHash: await hash(parsed.data.password, 12) }, select: { id: true, name: true, email: true } });
+    const user = await prisma.user.create({ data: { name: parsed.data.name, email, passwordHash: await bcrypt.hash(parsed.data.password, 12) }, select: { id: true, name: true, email: true } });
     await createUserSession(user.id);
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
