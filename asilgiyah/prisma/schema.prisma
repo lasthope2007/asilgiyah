@@ -40,6 +40,7 @@ model User {
   sessions Session[]
 
   addresses Address[]
+  orders Order[]
 }
 model Session {
 
@@ -241,12 +242,16 @@ model Order {
 
   isDemo Boolean @default(true)
 
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
 
   items OrderItem[]
 
   payments Payment[]
   @@index([isDemo,createdAt])
+  @@index([userId, createdAt])
 }
 model OrderItem {
 
