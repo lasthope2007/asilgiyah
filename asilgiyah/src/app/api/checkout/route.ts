@@ -73,18 +73,20 @@ export async function POST(request: NextRequest) {
       const orderNumber = `AS-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 
       for (const { item } of lines) {
-        const productUpdate = await tx.product.updateMany({
-          where: { id: item.productId, isActive: true, stock: { gte: item.quantity } },
-          data: { stock: { decrement: item.quantity } },
-        });
-        if (productUpdate.count !== 1) throw new Error("OUT_OF_STOCK");
-
+        // Variant stock is authoritative when a specific variant is selected.
+        // Decrementing both product and variant stock double-counts the same units.
         if (item.variantId) {
           const variantUpdate = await tx.productVariant.updateMany({
             where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity } },
             data: { stock: { decrement: item.quantity } },
           });
           if (variantUpdate.count !== 1) throw new Error("OUT_OF_STOCK");
+        } else {
+          const productUpdate = await tx.product.updateMany({
+            where: { id: item.productId, isActive: true, stock: { gte: item.quantity } },
+            data: { stock: { decrement: item.quantity } },
+          });
+          if (productUpdate.count !== 1) throw new Error("OUT_OF_STOCK");
         }
       }
 
