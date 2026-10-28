@@ -1,0 +1,1 @@
+export const toman=(n:number)=>`${new Intl.NumberFormat("fa-IR").format(n)} تومان`; export function normalizePersian(s:string){return s.normalize("NFKC").replace(/[يى]/g,"ی").replace(/ك/g,"ک").replace(/[\u064B-\u065F\u0670]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase("fa-IR")}

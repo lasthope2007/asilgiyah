@@ -1,0 +1,1 @@
+import {it,expect} from "vitest";import {normalizePersian,toman} from "../src/lib/utils";it("normalizes Persian characters",()=>expect(normalizePersian("كريم ياسمين")).toBe("کریم یاسمین"));it("collapses whitespace",()=>expect(normalizePersian(" گل   محمدی ")).toBe("گل محمدی"));it("formats toman",()=>expect(toman(1000)).toContain("تومان"));

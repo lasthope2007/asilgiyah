@@ -1,0 +1,1 @@
+import Link from "next/link";export default function NotFound(){return <main dir="rtl" className="grid min-h-screen place-items-center bg-cream text-center"><div><div className="text-7xl">🌿</div><h1 className="mt-4 text-3xl font-bold text-forest">این برگ پیدا نشد!</h1><Link href="/" className="btn-primary mt-7">بازگشت به خانه</Link></div></main>}
