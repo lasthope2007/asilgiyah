@@ -101,6 +101,10 @@ model Product {
 
   shortDescription String
 
+  metaTitle String?
+
+  metaDescription String?
+
   sku String @unique
 
   priceToman Int
